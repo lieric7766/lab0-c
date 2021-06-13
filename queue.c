@@ -215,76 +215,77 @@ void q_sort(queue_t *q)
     if (q == NULL || q->head == NULL) {
         return;
     }
-    list_ele_t *main_array[q->size];
+
+    q->head = merge_sort(q->head, q);
+}
+
+list_ele_t *get_middle(list_ele_t *tmp_ele)
+{
+    list_ele_t *fast = tmp_ele;
+    list_ele_t *slow = tmp_ele;
+    list_ele_t *tmp_head = tmp_ele;
+    while (fast != NULL && fast->next != NULL) {
+        fast = fast->next->next;
+        tmp_head = slow;
+        slow = slow->next;
+    }
+    tmp_head->next = NULL;
+    return slow;
+}
+
+list_ele_t *merge(list_ele_t *left, list_ele_t *middle, queue_t *q)
+{
     list_ele_t *tmp_ele;
-    tmp_ele = q->head;
-    for (int i = 0; i < q->size; ++i) {
-        main_array[i] = tmp_ele;
-        if (tmp_ele->next != NULL) {
+    if (strcmp(left->value, middle->value) > 0) {
+        q->head = middle;
+        tmp_ele = middle;
+        middle = middle->next;
+    } else {
+        q->head = left;
+        tmp_ele = left;
+        left = left->next;
+    }
+    while (left != NULL || middle != NULL) {
+        if (middle == NULL) {
+            tmp_ele->next = left;
+            left = left->next;
             tmp_ele = tmp_ele->next;
+            continue;
+        }
+
+        if (left == NULL) {
+            tmp_ele->next = middle;
+            middle = middle->next;
+            tmp_ele = tmp_ele->next;
+            continue;
+        }
+
+        if (strcmp(left->value, middle->value) <= 0) {
+            tmp_ele->next = left;
+            left = left->next;
+            tmp_ele = tmp_ele->next;
+            continue;
+        }
+
+        if (strcmp(left->value, middle->value) > 0) {
+            tmp_ele->next = middle;
+            middle = middle->next;
+            tmp_ele = tmp_ele->next;
+            continue;
         }
     }
-
-    merge_sort(main_array, 0, q->size - 1, q->size);
-    for (int i = 0; i < q->size; ++i) {
-        if (i == 0) {
-            q->head = main_array[i];
-        }
-
-        if (i == q->size - 1) {
-            q->tail = main_array[i];
-            main_array[i]->next = NULL;
-            break;
-        }
-
-        if ((i + 1) < q->size) {
-            main_array[i]->next = main_array[i + 1];
-        }
-    }
+    q->tail = tmp_ele;
+    return q->head;
 }
 
-void merge(list_ele_t *arr[], int left, int right, int arr_size)
+list_ele_t *merge_sort(list_ele_t *tmp_ele, queue_t *q)
 {
-    int l_start = left;
-    int mid = (l_start + right) / 2 + 1;
-    int r_start = mid;
-    list_ele_t *tmp_arr[arr_size];
+    list_ele_t *left = tmp_ele;
+    list_ele_t *middle = get_middle(left);
+    if (left == middle)
+        return left;
 
-    for (int i = left; i <= right; ++i) {
-        if (r_start > right) {
-            tmp_arr[i] = arr[l_start];
-            l_start++;
-            continue;
-        }
-        if (l_start >= mid) {
-            tmp_arr[i] = arr[r_start];
-            r_start++;
-            continue;
-        }
-        if (*arr[r_start]->value <= *arr[l_start]->value) {
-            tmp_arr[i] = arr[r_start];
-            r_start++;
-            continue;
-        }
-        if (*arr[r_start]->value > *arr[l_start]->value) {
-            tmp_arr[i] = arr[l_start];
-            l_start++;
-            continue;
-        }
-    }
-    for (int i = left; i <= right; ++i) {
-        arr[i] = tmp_arr[i];
-    }
-}
-
-
-void merge_sort(list_ele_t *arr[], int left, int right, int arr_size)
-{
-    if (left == right)
-        return;
-
-    int mid = (left + right) / 2;
-    merge_sort(arr, left, mid, arr_size);
-    merge_sort(arr, mid + 1, right, arr_size);
-    merge(arr, left, right, arr_size);
+    left = merge_sort(left, q);
+    middle = merge_sort(middle, q);
+    return merge(left, middle, q);
 }

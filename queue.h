@@ -92,7 +92,8 @@ void q_reverse(queue_t *q);
  * element, do nothing.
  */
 void q_sort(queue_t *q);
-void merge(list_ele_t *arr[], int left, int right, int arr_size);
-void merge_sort(list_ele_t *arr[], int left, int right, int arr_size);
+list_ele_t *get_middle(list_ele_t *tmp_ele);
+list_ele_t *merge(list_ele_t *left, list_ele_t *middle, queue_t *q);
+list_ele_t *merge_sort(list_ele_t *tmp_ele, queue_t *q);
 
 #endif /* LAB0_QUEUE_H */
